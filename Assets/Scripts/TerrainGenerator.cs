@@ -1,7 +1,17 @@
+using System;
 using UnityEngine;
 
 public class TerrainGenerator : MonoBehaviour
 {
+    public enum DrawMode
+    {
+        NoiseMap,
+        ColorMap,
+        Mesh
+    }
+
+    public DrawMode drawMode;
+
     [SerializeField]
     private TerrainDisplay terrainDisplay;
 
@@ -14,6 +24,15 @@ public class TerrainGenerator : MonoBehaviour
     public float persistence;
 
     public float lacunarity;
+
+    public AnimationCurve damperHeightCurve;
+
+    public float mountainHeightMultiplier;
+    public AnimationCurve mountainHeightCurve;
+
+    public TerrainType[] regions;
+
+    public float[,] finalNonNormalizedHeightMap;
 
     private void OnValidate()
     {
@@ -36,11 +55,22 @@ public class TerrainGenerator : MonoBehaviour
         {
             octaves = 0;
         }
+
+        if (octaves > 20)
+        {
+            octaves = 20;
+        }
+
+        if (mountainHeightMultiplier < 1.0f)
+        {
+            mountainHeightMultiplier = 1.0f;
+        }
     }
 
-    public void GenerateTerrain()
+    public void GenerateTerrain(RandomGenerator randomGenerator)
     {
-        float[,] noizeMap = Noise.GenerateNoizeMap(
+        float[,] noiseMap = Noise.GenerateNoizeMap(
+            randomGenerator,
             mapWidth,
             mapHeight,
             noiseScale,
@@ -48,6 +78,70 @@ public class TerrainGenerator : MonoBehaviour
             persistence,
             lacunarity);
 
-        terrainDisplay.DrawNoizeMap(noizeMap);
+        ApplyHeightCurve(ref noiseMap);
+
+        var colorMap = new Color[mapWidth * mapHeight];
+        for (var x = 0; x < mapWidth; x++)
+        {
+            for (var y = 0; y < mapHeight; y++)
+            {
+                float currentHeight = noiseMap[x, y];
+                for (var i = 0; i < regions.Length; i++)
+                {
+                    if (!(currentHeight < regions[i].height))
+                    {
+                        continue;
+                    }
+
+                    colorMap[y * mapWidth + x] = regions[i].color;
+                    break;
+                }
+            }
+        }
+
+        switch (drawMode)
+        {
+            case DrawMode.NoiseMap:
+                terrainDisplay.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
+                break;
+
+            case DrawMode.ColorMap:
+                terrainDisplay.DrawTexture(
+                    TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
+
+                break;
+
+            case DrawMode.Mesh:
+                terrainDisplay.DrawMesh(
+                    MeshGenerator.GenerateTerrainMesh(
+                        noiseMap,
+                        mountainHeightMultiplier,
+                        mountainHeightCurve,
+                        out finalNonNormalizedHeightMap),
+                    TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
+
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void ApplyHeightCurve(ref float[,] noiseMap)
+    {
+        for (var x = 0; x < mapWidth; x++)
+        {
+            for (var y = 0; y < mapHeight; y++)
+            {
+                noiseMap[x, y] = damperHeightCurve.Evaluate(noiseMap[x, y]);
+            }
+        }
+    }
+
+    public void Clear()
+    {
+        terrainDisplay.ClearTerrain();
+        terrainDisplay.ClearMesh();
+        finalNonNormalizedHeightMap = null;
     }
 }

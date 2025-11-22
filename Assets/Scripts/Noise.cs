@@ -3,6 +3,7 @@ using UnityEngine;
 public static class Noise
 {
     public static float[,] GenerateNoizeMap(
+        RandomGenerator randomGenerator,
         int width,
         int height,
         float scale,
@@ -26,8 +27,8 @@ public static class Noise
         var octaveOffsets = new Vector2[octaves];
         for (var i = 0; i < octaves; i++)
         {
-            float offsetX = RandomGenerator.NextFloat(-100000f, 100000f);
-            float offsetY = RandomGenerator.NextFloat(-100000f, 100000f);
+            float offsetX = randomGenerator.NextFloat(-100000f, 100000f);
+            float offsetY = randomGenerator.NextFloat(-100000f, 100000f);
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
 
@@ -45,6 +46,7 @@ public static class Noise
                     float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[i].y;
 
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
+
                     noizeHeight += perlinValue * amplitude;
                     amplitude   *= persistence;
                     frequency   *= lacunarity;

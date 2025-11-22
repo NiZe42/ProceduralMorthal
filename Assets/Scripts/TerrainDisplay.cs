@@ -3,36 +3,50 @@ using UnityEngine;
 public class TerrainDisplay : MonoBehaviour
 {
     [SerializeField]
-    public Renderer targetRenderer;
+    private Renderer targetRenderer;
 
-    public void DrawNoizeMap(float[,] noizeMap)
+    [SerializeField]
+    private MeshFilter targetMeshFilter;
+
+    [SerializeField]
+    private MeshRenderer targetMeshRenderer;
+
+    [SerializeField]
+    private MeshCollider targetMeshCollider;
+
+    public void DrawTexture(Texture2D texture)
     {
-        int width  = noizeMap.GetLength(0);
-        int height = noizeMap.GetLength(1);
+        targetRenderer.sharedMaterial.mainTexture = texture;
+        targetRenderer.transform.localScale = new Vector3(texture.width, 1.0f, texture.height);
+    }
 
-        var noizeMapTexture = new Texture2D(
-            width,
-            height,
-            TextureFormat.ARGB32,
-            false);
+    // A Hack to make it the same size as the terrain plane.
+    public void DrawMesh(MeshData meshData, Texture2D texture)
+    {
+        Mesh mesh = meshData.CreateMesh();
+        targetMeshFilter.sharedMesh                   = mesh;
+        targetMeshRenderer.sharedMaterial.mainTexture = texture;
+        targetMeshCollider.sharedMesh                 = mesh;
+        targetMeshFilter.transform.localScale = new Vector3(
+            texture.width / 10.0f,
+            (texture.width + texture.height) / 20.0f,
+            texture.height / 10.0f);
+    }
 
-        var colorMap = new Color[width * height];
+    public void ChangeMesh(Mesh mesh)
+    {
+        targetMeshFilter.sharedMesh   = mesh;
+        targetMeshCollider.sharedMesh = mesh;
+    }
 
-        for (var x = 0; x < noizeMapTexture.width; x++)
-        {
-            for (var y = 0; y < noizeMapTexture.height; y++)
-            {
-                colorMap[y * width + x] = Color.Lerp(Color.black, Color.white, noizeMap[x, y]);
-            }
-        }
+    public void ClearTerrain()
+    {
+        targetRenderer.sharedMaterial.mainTexture = null;
+    }
 
-        noizeMapTexture.SetPixels(colorMap);
-        noizeMapTexture.Apply();
-
-        targetRenderer.sharedMaterial.mainTexture = noizeMapTexture;
-        targetRenderer.transform.localScale = new Vector3(
-            noizeMapTexture.width,
-            1.0f,
-            noizeMapTexture.height);
+    public void ClearMesh()
+    {
+        targetMeshFilter.sharedMesh                   = null;
+        targetMeshRenderer.sharedMaterial.mainTexture = null;
     }
 }

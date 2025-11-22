@@ -2,26 +2,35 @@ using UnityEngine;
 
 public class WorldGenerator : MonoBehaviour
 {
-    [SerializeField]
-    private int seed;
+    public static WorldGenerator Instance;
+    public int terrainGeneratorSeed;
+    public int waterGeneratorSeed;
 
-    [SerializeField]
-    private TerrainGenerator terrainGenerator;
+    public TerrainGenerator terrainGenerator;
+
+    public WaterGenerator waterGenerator;
+
+    public bool autoUpdate;
+
+    private readonly RandomGenerator terrainRandomGenerator = new RandomGenerator();
+    private readonly RandomGenerator waterRandomGenerator = new RandomGenerator();
 
     public void InitializeAndGenerateTerrain()
     {
-        RandomGenerator.Initialize(seed);
+        ClearAll();
+        terrainRandomGenerator.Initialize(terrainGeneratorSeed);
         GenerateTerrain();
     }
 
     private void GenerateTerrain()
     {
-        terrainGenerator.GenerateTerrain();
+        terrainGenerator.GenerateTerrain(terrainRandomGenerator);
     }
 
     public void InitializeAndGenerateWaterBanks()
     {
-        RandomGenerator.Initialize(seed);
+        ClearAll();
+        waterRandomGenerator.Initialize(waterGeneratorSeed);
         GenerateWaterBanks();
     }
 
@@ -29,12 +38,19 @@ public class WorldGenerator : MonoBehaviour
 
     public void InitializeAndGenerateAll()
     {
-        RandomGenerator.Initialize(seed);
+        ClearAll();
         GenerateAll();
     }
 
     private void GenerateAll()
     {
-        GenerateTerrain();
+        ClearAll();
+        InitializeAndGenerateTerrain();
+        InitializeAndGenerateWaterBanks();
+    }
+
+    public void ClearAll()
+    {
+        terrainGenerator.Clear();
     }
 }
