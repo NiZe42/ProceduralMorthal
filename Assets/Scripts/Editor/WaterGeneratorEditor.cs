@@ -62,7 +62,7 @@ public class WaterGeneratorEditor : Editor
 
         GUILayout.EndHorizontal();
 
-        if (GUILayout.Button("Clear ALL Bodies"))
+        if (GUILayout.Button("ClearTerrain ALL Bodies"))
         {
             waterGenerator.ClearAllWaterBodies();
         }

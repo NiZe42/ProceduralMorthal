@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class WaterGenerator : MonoBehaviour
@@ -19,6 +18,9 @@ public class WaterGenerator : MonoBehaviour
     public int pointsPerWaterSegment;
     public int circleResolution;
     public LayerMask terrainMask;
+
+    public bool debugRiverSplines;
+    public bool debugWaterNodes;
 
     public List<WaterBody> waterBodies = new List<WaterBody>();
 
@@ -78,8 +80,6 @@ public class WaterGenerator : MonoBehaviour
 
         var node = riverNodeObject.AddComponent<WaterNode>();
         body.nodes.Add(node);
-
-        Undo.RegisterCreatedObjectUndo(riverNodeObject, "Add WaterNode");
     }
 
     public void Carve()
@@ -136,6 +136,7 @@ public class WaterGenerator : MonoBehaviour
         }
 
         mesh.vertices = vertsLocal;
+        RecalculateTerrainUVs(mesh);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
@@ -187,7 +188,7 @@ public class WaterGenerator : MonoBehaviour
         return points;
     }
 
-    private List<Vector3> GenerateSplinePoints(List<WaterNode> nodes)
+    public List<Vector3> GenerateSplinePoints(List<WaterNode> nodes)
     {
         var result = new List<Vector3>();
 
@@ -232,6 +233,48 @@ public class WaterGenerator : MonoBehaviour
         body.meshCollider.sharedMesh    = mesh;
     }
 
+    public static void RecalculateTerrainUVs(Mesh mesh)
+    {
+        Vector3[] vertices = mesh.vertices;
+        var       uvs      = new Vector2[vertices.Length];
+
+        float minX = float.MaxValue, maxX = float.MinValue;
+        float minZ = float.MaxValue, maxZ = float.MinValue;
+
+        foreach (Vector3 v in vertices)
+        {
+            if (v.x < minX)
+            {
+                minX = v.x;
+            }
+
+            if (v.x > maxX)
+            {
+                maxX = v.x;
+            }
+
+            if (v.z < minZ)
+            {
+                minZ = v.z;
+            }
+
+            if (v.z > maxZ)
+            {
+                maxZ = v.z;
+            }
+        }
+
+        float sizeX = maxX - minX;
+        float sizeZ = maxZ - minZ;
+
+        for (var i = 0; i < vertices.Length; i++)
+        {
+            uvs[i] = new Vector2((vertices[i].x - minX) / sizeX, (vertices[i].z - minZ) / sizeZ);
+        }
+
+        mesh.uv = uvs;
+    }
+
     private Vector3 CatmullRom(
         Vector3 p0,
         Vector3 p1,
@@ -245,28 +288,32 @@ public class WaterGenerator : MonoBehaviour
 
     private void CarveSegment(ref Vector3[] verts, Vector3 start, Vector3 end)
     {
-        Vector3 dir    = (end - start).normalized;
-        float   segLen = Vector3.Distance(start, end);
+        Vector3 dir           = (end - start).normalized;
+        float   segmentLength = Vector3.Distance(start, end);
 
         for (var i = 0; i < verts.Length; i++)
         {
-            Vector3 v   = verts[i];
-            Vector3 toV = v - start;
+            Vector3 vert = verts[i];
+            Vector3 toV  = vert - start;
 
-            float   t       = Mathf.Clamp(Vector3.Dot(toV, dir), 0f, segLen);
+            float   t       = Mathf.Clamp(Vector3.Dot(dir, toV), 0f, segmentLength);
             Vector3 closest = start + dir * t;
 
-            float dist = Vector3.Distance(v, closest);
+            float dist = Vector3.Distance(vert, closest);
 
             float halfWidth = riverWidth / 2;
-
             if (dist < halfWidth)
             {
-                float norm    = dist / halfWidth;
-                float falloff = Mathf.Pow(1 - norm, bankSmoothness * 2f);
+                float normalizedProportion = dist / halfWidth;
+                float influence            = Mathf.Exp(-normalizedProportion * bankSmoothness);
 
-                float newY = Mathf.Lerp(v.y, waterHeight, falloff);
-                verts[i] = new Vector3(v.x, newY, v.z);
+                if (influence < 0.0001f)
+                {
+                    continue;
+                }
+
+                float newY = Mathf.Lerp(vert.y, waterHeight, influence);
+                verts[i] = new Vector3(vert.x, newY, vert.z);
             }
         }
     }

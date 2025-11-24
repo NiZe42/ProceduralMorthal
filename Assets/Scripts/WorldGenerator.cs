@@ -4,20 +4,21 @@ public class WorldGenerator : MonoBehaviour
 {
     public static WorldGenerator Instance;
     public int terrainGeneratorSeed;
-    public int waterGeneratorSeed;
+    public int roadGeneratorSeed;
+    public int buildingGeneratorSeed;
 
     public TerrainGenerator terrainGenerator;
-
     public WaterGenerator waterGenerator;
+    public RoadGenerator roadGenerator;
+    public BuildingGenerator buildingGenerator;
 
     public bool autoUpdate;
-
-    private readonly RandomGenerator terrainRandomGenerator = new RandomGenerator();
-    private readonly RandomGenerator waterRandomGenerator = new RandomGenerator();
+    public RandomGenerator buildingRangomGenerator = new RandomGenerator();
+    public RandomGenerator roadRandomGenerator = new RandomGenerator();
+    public RandomGenerator terrainRandomGenerator = new RandomGenerator();
 
     public void InitializeAndGenerateTerrain()
     {
-        ClearAll();
         terrainRandomGenerator.Initialize(terrainGeneratorSeed);
         GenerateTerrain();
     }
@@ -27,30 +28,32 @@ public class WorldGenerator : MonoBehaviour
         terrainGenerator.GenerateTerrain(terrainRandomGenerator);
     }
 
-    public void InitializeAndGenerateWaterBanks()
+    public void InitializeAndGenerateRoads()
     {
-        ClearAll();
-        waterRandomGenerator.Initialize(waterGeneratorSeed);
-        GenerateWaterBanks();
+        roadRandomGenerator.Initialize(roadGeneratorSeed);
+        GenerateRoads();
     }
 
-    private void GenerateWaterBanks() { }
-
-    public void InitializeAndGenerateAll()
+    private void GenerateRoads()
     {
-        ClearAll();
-        GenerateAll();
+        roadGenerator.GenerateRoads();
     }
 
-    private void GenerateAll()
+    public void InitializeAndGenerateBuildings()
     {
-        ClearAll();
-        InitializeAndGenerateTerrain();
-        InitializeAndGenerateWaterBanks();
+        buildingRangomGenerator.Initialize(buildingGeneratorSeed);
+        GenerateBuildings();
+    }
+
+    private void GenerateBuildings()
+    {
+        buildingGenerator.GenerateBuildings();
     }
 
     public void ClearAll()
     {
-        terrainGenerator.Clear();
+        terrainGenerator.ClearTerrain();
+        waterGenerator.ClearAllWaterBodies();
+        roadGenerator.ClearAllRoads();
     }
 }

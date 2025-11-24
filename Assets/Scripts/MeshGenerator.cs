@@ -47,6 +47,27 @@ public static class MeshGenerator
         return meshData;
     }
 
+    public static (float minHeight, float maxHeight) GetMinMax(Vector3[] vertices)
+    {
+        var minHeight = float.MaxValue;
+        var maxHeight = float.MinValue;
+
+        foreach (Vector3 vertice in vertices)
+        {
+            if (vertice.y < minHeight)
+            {
+                minHeight = vertice.y;
+            }
+
+            if (vertice.y > maxHeight)
+            {
+                maxHeight = vertice.y;
+            }
+        }
+
+        return(minHeight, maxHeight);
+    }
+
     public static MeshData GenerateRiverMeshData(
         List<Vector3> splinePoints,
         float riverWidth,
@@ -61,8 +82,7 @@ public static class MeshGenerator
         var extraVertCount = 4;
         int vertexCount    = coreVertCount + extraVertCount;
 
-        int triCount = (splinePoints.Count - 1) * 2 * 3 +
-            2 * 2 * 3; // we add a quad to start and end of the river
+        int triCount = (splinePoints.Count - 1) * 2 * 3 + 2 * 2 * 3;
 
         var meshData = new MeshData(vertexCount, triCount);
 
@@ -79,6 +99,12 @@ public static class MeshGenerator
         var uvOffset = 0f;
         var vIndex   = 0;
 
+        float averageSegmentLength = totalLength / splinePoints.Count;
+
+        float tileLength = averageSegmentLength;
+
+        float tileWidth = riverWidth / 5f;
+
         for (var i = 0; i < splinePoints.Count; i++)
         {
             var pos = new Vector3(splinePoints[i].x, waterSurfaceHeight, splinePoints[i].z);
@@ -92,21 +118,16 @@ public static class MeshGenerator
             Vector3 left  = pos - cross * (riverWidth * 0.5f);
             Vector3 right = pos + cross * (riverWidth * 0.5f);
 
-            /*// Need this for Z Figthing in cases where angle of segments is <90.
-        var yOffset = 1f;
-        if (i % 2 == 0)
-        {
-            left  += new Vector3(0, yOffset, 0);
-            right += new Vector3(0, yOffset, 0);
-        }*/
-
             meshData.vertices[vIndex]     = left;
             meshData.vertices[vIndex + 1] = right;
 
-            float v = uvOffset / totalLength;
+            float v = uvOffset / tileLength;
 
-            meshData.uvs[vIndex]     = new Vector2(0, v);
-            meshData.uvs[vIndex + 1] = new Vector2(1, v);
+            float uLeft  = 0f / tileWidth;
+            float uRight = riverWidth / tileWidth;
+
+            meshData.uvs[vIndex]     = new Vector2(uLeft, v);
+            meshData.uvs[vIndex + 1] = new Vector2(uRight, v);
 
             vIndex += 2;
 
@@ -117,7 +138,7 @@ public static class MeshGenerator
         }
 
         Vector3 dirStart = (splinePoints[1] - splinePoints[0]).normalized;
-        float   extend   = riverWidth * 0.5f;
+        float   extend   = riverWidth * 0.6f;
 
         int extraStartLeft  = coreVertCount;
         int extraStartRight = coreVertCount + 1;
@@ -131,9 +152,9 @@ public static class MeshGenerator
         meshData.vertices[extraStartLeft]  = startLeftExt;
         meshData.vertices[extraStartRight] = startRightExt;
 
-        float startUVO = -extend / totalLength;
-        meshData.uvs[extraStartLeft]  = new Vector2(0, startUVO);
-        meshData.uvs[extraStartRight] = new Vector2(1, startUVO);
+        float startV = -extend / tileLength;
+        meshData.uvs[extraStartLeft]  = new Vector2(0f / tileWidth, startV);
+        meshData.uvs[extraStartRight] = new Vector2(riverWidth / tileWidth, startV);
 
         Vector3 dirEnd = (splinePoints[^1] - splinePoints[^2]).normalized;
 
@@ -152,9 +173,9 @@ public static class MeshGenerator
         meshData.vertices[extraEndLeft]  = endLeftExt;
         meshData.vertices[extraEndRight] = endRightExt;
 
-        float endV = 1f + extend / totalLength;
-        meshData.uvs[extraEndLeft]  = new Vector2(0, endV);
-        meshData.uvs[extraEndRight] = new Vector2(1, endV);
+        float endV = uvOffset / tileLength + extend / tileLength;
+        meshData.uvs[extraEndLeft]  = new Vector2(0f / tileWidth, endV);
+        meshData.uvs[extraEndRight] = new Vector2(riverWidth / tileWidth, endV);
 
         for (var i = 0; i < splinePoints.Count - 1; i++)
         {

@@ -42,4 +42,10 @@ public class RandomGenerator
     {
         return min + (float)random.NextDouble() * (max - min);
     }
+
+    // Accepts clamped numbers.
+    public bool NextPercentage(float percentage)
+    {
+        return random.NextDouble() > 1 - percentage;
+    }
 }

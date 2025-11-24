@@ -63,6 +63,18 @@ public class WorldGeneratorEditor : Editor
                 worldGenerator.waterGenerator,
                 typeof(WaterGenerator),
                 true);
+
+            worldGenerator.roadGenerator = (RoadGenerator)EditorGUILayout.ObjectField(
+                "Road Generator",
+                worldGenerator.roadGenerator,
+                typeof(RoadGenerator),
+                true);
+
+            worldGenerator.buildingGenerator = (BuildingGenerator)EditorGUILayout.ObjectField(
+                "Building Generator",
+                worldGenerator.buildingGenerator,
+                typeof(BuildingGenerator),
+                true);
         }
 
         showBaseSettings = EditorGUILayout.Foldout(showBaseSettings, "Base Settings");
@@ -72,9 +84,13 @@ public class WorldGeneratorEditor : Editor
                 "Terrain Generator Seed",
                 worldGenerator.terrainGeneratorSeed);
 
-            worldGenerator.waterGeneratorSeed = EditorGUILayout.IntField(
-                "Water Generator Seed",
-                worldGenerator.waterGeneratorSeed);
+            worldGenerator.roadGeneratorSeed = EditorGUILayout.IntField(
+                "Road Generator Seed",
+                worldGenerator.roadGeneratorSeed);
+
+            worldGenerator.buildingGeneratorSeed = EditorGUILayout.IntField(
+                "Building Generator Seed",
+                worldGenerator.buildingGeneratorSeed);
 
             worldGenerator.autoUpdate = EditorGUILayout.Toggle(
                 "Auto Update",
@@ -105,15 +121,12 @@ public class WorldGeneratorEditor : Editor
 
                 break;
             case 2:
-                // changed = DrawSection(ref roadEditor, worldGenerator.roadGenerator);
+                changed = DrawSection(ref roadEditor, worldGenerator.roadGenerator);
 
                 break;
             case 3:
-                // changed = DrawSection(ref buildingEditor, worldGenerator.buildingGenerator);
+                changed = DrawSection(ref buildingEditor, worldGenerator.buildingGenerator);
 
-                break;
-            case 4:
-                DrawSectionAll(worldGenerator);
                 break;
         }
 
@@ -151,12 +164,7 @@ public class WorldGeneratorEditor : Editor
 
     private void DrawSectionAll(WorldGenerator worldGenerator)
     {
-        if (GUILayout.Button("Generate ALL"))
-        {
-            worldGenerator.InitializeAndGenerateAll();
-        }
-
-        if (GUILayout.Button("Clear ALL"))
+        if (GUILayout.Button("Clear all"))
         {
             worldGenerator.ClearAll();
         }
@@ -165,7 +173,6 @@ public class WorldGeneratorEditor : Editor
     private void DrawButtons(WorldGenerator worldGenerator)
     {
         EditorGUILayout.Space(5);
-        EditorGUILayout.LabelField("Actions", EditorStyles.boldLabel);
 
         switch (tabIndex)
         {
@@ -181,9 +188,6 @@ public class WorldGeneratorEditor : Editor
             case 3:
                 DrawBuildingButtons(worldGenerator);
                 break;
-            case 4:
-                DrawAllButtons(worldGenerator);
-                break;
         }
     }
 
@@ -194,7 +198,7 @@ public class WorldGeneratorEditor : Editor
             worldGenerator.InitializeAndGenerateTerrain();
         }
 
-        if (GUILayout.Button("Clean All"))
+        if (GUILayout.Button("Clear All"))
         {
             worldGenerator.ClearAll();
         }
@@ -204,24 +208,22 @@ public class WorldGeneratorEditor : Editor
 
     private void DrawRoadButtons(WorldGenerator worldGenerator)
     {
-        if (GUILayout.Button("Build Roads")) { }
+        if (GUILayout.Button("Build Roads"))
+        {
+            worldGenerator.InitializeAndGenerateRoads();
+        }
+
+        if (GUILayout.Button("Clear All"))
+        {
+            worldGenerator.ClearAll();
+        }
     }
 
     private void DrawBuildingButtons(WorldGenerator worldGenerator)
     {
-        if (GUILayout.Button("Build Buildings")) { }
-    }
-
-    private void DrawAllButtons(WorldGenerator worldGenerator)
-    {
-        if (GUILayout.Button("Generate ALL"))
+        if (GUILayout.Button("Build Buildings"))
         {
-            worldGenerator.InitializeAndGenerateAll();
-        }
-
-        if (GUILayout.Button("Clear ALL"))
-        {
-            worldGenerator.ClearAll();
+            worldGenerator.InitializeAndGenerateBuildings();
         }
     }
 
@@ -232,12 +234,18 @@ public class WorldGeneratorEditor : Editor
             case 0:
                 worldGenerator.InitializeAndGenerateTerrain();
                 break;
+            case 2:
+                worldGenerator.InitializeAndGenerateRoads();
+                break;
+            case 3:
+                worldGenerator.InitializeAndGenerateBuildings();
+                break;
         }
     }
 
     private void DestroyEditor(ref Editor editor)
     {
-        if (editor == null)
+        if (!editor)
         {
             return;
         }

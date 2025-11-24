@@ -1,0 +1,117 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4042299558199698953
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1805685451369781122}
+  m_Layer: 0
+  m_Name: PlankContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1805685451369781122
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4042299558199698953}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 3}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8946661266723317258}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4525510426463158315
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8946661266723317258}
+  - component: {fileID: 1759081224057102515}
+  - component: {fileID: 8133185581214791996}
+  m_Layer: 0
+  m_Name: Building
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8946661266723317258
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525510426463158315}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1805685451369781122}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1759081224057102515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525510426463158315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28a1094734debbb4f8c42216190aaf6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  basePrefab: {fileID: 3699203022268337576, guid: 08d28fa9413c9e2468bda3b135c043da, type: 3}
+  floorPrefab: {fileID: 5607793949320731324, guid: 6a2f4258a9ea7114d8ec6cfcd194ea55, type: 3}
+  twoFloorPrefab: {fileID: 7290823167600520236, guid: 293e452aab1fa6447ae901699c169b40, type: 3}
+  sideRoofLeftPrefab: {fileID: 4437161270615019558, guid: 253ba897fe6ac5948b0ac39b34c6d685, type: 3}
+  sideRoofRightPrefab: {fileID: 1806103901907244199, guid: ad41b1a2484ae2c40b44ead525a6a087, type: 3}
+  forwardRoofSmallPrefab: {fileID: 4391189071523104932, guid: 3f0dfacfbe9c56049b842a5090fecf17, type: 3}
+  forwardRoofBigPrefab: {fileID: 8061723812252616044, guid: 712a166f4932ccb40b7ff523ab58b81d, type: 3}
+  plankPrefab: {fileID: 223994406440281876, guid: 1bff317627bfc914fa85de3f582692b6, type: 3}
+  plankContainer: {fileID: 1805685451369781122}
+  twoFloorRightProbability: 0.5
+  sideRoofLeftProbability: 0.5
+  sideRoomRightProbability: 0.5
+  forwardRoofSmallProbability: 0.5
+  frontOffset: 3
+  staircaseCount: 5
+  staircaseStepLength: 1
+  staircaseStepHeight: -1
+--- !u!65 &8133185581214791996
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4525510426463158315}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 15, y: 2, z: 8}
+  m_Center: {x: 0, y: 0, z: 1}

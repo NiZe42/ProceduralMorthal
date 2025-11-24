@@ -15,8 +15,9 @@ public class TerrainGenerator : MonoBehaviour
     [SerializeField]
     private TerrainDisplay terrainDisplay;
 
-    public int mapWidth;
-    public int mapHeight;
+    public int mapAxis;
+    public Vector3 mapScale;
+
     public float noiseScale;
     public int octaves;
 
@@ -36,16 +37,13 @@ public class TerrainGenerator : MonoBehaviour
 
     private void OnValidate()
     {
-        if (mapWidth < 1)
+        if (mapAxis < 3)
         {
-            mapWidth = 1;
+            mapAxis = 3;
         }
 
-        if (mapHeight < 1)
-        {
-            mapHeight = 1;
-        }
-
+        mapScale.y = mapScale.x;
+        mapScale.z = mapScale.x;
         if (lacunarity < 1)
         {
             lacunarity = 1;
@@ -71,8 +69,8 @@ public class TerrainGenerator : MonoBehaviour
     {
         float[,] noiseMap = Noise.GenerateNoizeMap(
             randomGenerator,
-            mapWidth,
-            mapHeight,
+            mapAxis,
+            mapAxis,
             noiseScale,
             octaves,
             persistence,
@@ -80,10 +78,10 @@ public class TerrainGenerator : MonoBehaviour
 
         ApplyHeightCurve(ref noiseMap);
 
-        var colorMap = new Color[mapWidth * mapHeight];
-        for (var x = 0; x < mapWidth; x++)
+        var colorMap = new Color[mapAxis * mapAxis];
+        for (var x = 0; x < mapAxis; x++)
         {
-            for (var y = 0; y < mapHeight; y++)
+            for (var y = 0; y < mapAxis; y++)
             {
                 float currentHeight = noiseMap[x, y];
                 for (var i = 0; i < regions.Length; i++)
@@ -93,7 +91,7 @@ public class TerrainGenerator : MonoBehaviour
                         continue;
                     }
 
-                    colorMap[y * mapWidth + x] = regions[i].color;
+                    colorMap[y * mapAxis + x] = regions[i].color;
                     break;
                 }
             }
@@ -107,7 +105,7 @@ public class TerrainGenerator : MonoBehaviour
 
             case DrawMode.ColorMap:
                 terrainDisplay.DrawTexture(
-                    TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
+                    TextureGenerator.TextureFromColorMap(colorMap, mapAxis, mapAxis));
 
                 break;
 
@@ -118,7 +116,8 @@ public class TerrainGenerator : MonoBehaviour
                         mountainHeightMultiplier,
                         mountainHeightCurve,
                         out finalNonNormalizedHeightMap),
-                    TextureGenerator.TextureFromColorMap(colorMap, mapWidth, mapHeight));
+                    TextureGenerator.TextureFromColorMap(colorMap, mapAxis, mapAxis),
+                    mapScale);
 
                 break;
 
@@ -129,16 +128,16 @@ public class TerrainGenerator : MonoBehaviour
 
     private void ApplyHeightCurve(ref float[,] noiseMap)
     {
-        for (var x = 0; x < mapWidth; x++)
+        for (var x = 0; x < mapAxis; x++)
         {
-            for (var y = 0; y < mapHeight; y++)
+            for (var y = 0; y < mapAxis; y++)
             {
                 noiseMap[x, y] = damperHeightCurve.Evaluate(noiseMap[x, y]);
             }
         }
     }
 
-    public void Clear()
+    public void ClearTerrain()
     {
         terrainDisplay.ClearTerrain();
         terrainDisplay.ClearMesh();
